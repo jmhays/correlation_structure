@@ -2,7 +2,7 @@
 each new BRER iteration."""
 
 import numpy as np
-from run_brer.metadata import MetaData, MultiMetaData
+from correlation_structure.metadata import MetaData, MultiMetaData
 import json
 
 

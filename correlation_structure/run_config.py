@@ -1,9 +1,9 @@
 """RunConfig class handles the actual workflow logic."""
 
-from run_brer.run_data import RunData
-from run_brer.pair_data import MultiPair
-from run_brer.plugin_configs import TrainingPluginConfig, ConvergencePluginConfig, ProductionPluginConfig, PluginConfig
-from run_brer.directory_helper import DirectoryHelper
+from correlation_structure.run_data import RunData
+from correlation_structure.pair_data import MultiPair
+from correlation_structure.plugin_configs import TrainingPluginConfig, ConvergencePluginConfig, ProductionPluginConfig, PluginConfig
+from correlation_structure.directory_helper import DirectoryHelper
 from copy import deepcopy
 import os
 import shutil

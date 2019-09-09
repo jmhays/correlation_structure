@@ -1,9 +1,9 @@
 """
-run_brer
+correlation_structure
 """
 
 # Add imports here
-import run_brer 
+import correlation_structure 
 
 # Handle versioneer
 from ._version import get_versions

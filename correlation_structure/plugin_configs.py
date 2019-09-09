@@ -2,7 +2,7 @@
 class corresponds to ONE restraint since gmxapi plugins each correspond to one
 restraint."""
 
-from run_brer.metadata import MetaData
+from correlation_structure.metadata import MetaData
 from abc import abstractmethod
 import gmx
 

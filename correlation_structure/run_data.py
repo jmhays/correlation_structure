@@ -1,7 +1,7 @@
 """Class that handles the simulation data for BRER simulations.
 """
-from run_brer.metadata import MetaData
-from run_brer.pair_data import PairData
+from correlation_structure.metadata import MetaData
+from correlation_structure.pair_data import PairData
 import json
 
 

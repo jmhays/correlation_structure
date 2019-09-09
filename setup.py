@@ -1,5 +1,5 @@
 """
-run_brer
+correlation_structure
 """
 
 import sys
@@ -21,7 +21,7 @@ except:
 
 setup(
     # Self-descriptive entries which should always be present
-    name='run_brer',
+    name='correlation_structure',
     author='Jennifer M. Hays',
     author_email='jennifer.m.hays@gmail.com',
     description=short_description[0],

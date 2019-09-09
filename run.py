@@ -6,7 +6,7 @@ Example run script for BRER simulations
 import run_brer.run_config as rc
 import sys
 
-sys.path.append('/home/jennifer/Git/brer/build/src/pythonmodule')
+# sys.path.append('/home/jennifer/Git/brer/build/src/pythonmodule')
 
 init = {
     'tpr': '/home/jennifer/Git/run_brer/run_brer/data/topol.tpr',
