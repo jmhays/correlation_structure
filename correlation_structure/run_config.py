@@ -280,7 +280,7 @@ class RunConfig:
             current_target = self.run_data.get('target', name=name)
             self._logger.info("Plugin {}: alpha = {}, target = {}".format(name, current_alpha, current_target))
 
-    def run(self):
+    def run(self, set_next_phase=False):
         """Perform the MD simulations.
         """
         phase = self.run_data.get('phase')
@@ -292,8 +292,11 @@ class RunConfig:
             self.run_data.set(phase='convergence')
         elif phase == 'convergence':
             self.__converge()
-            self.run_data.set(phase='production')
+            if set_next_phase:
+                self.run_data.set(phase='production')
         else:
             self.__production()
-            self.run_data.set(phase='training', start_time=0, iteration=(self.run_data.get('iteration') + 1))
+            if set_next_phase:
+                self.run_data.set(phase='training', start_time=0, iteration=(self.run_data.get('iteration') + 1))
+        
         self.run_data.save_config(self.state_json)
