@@ -16,7 +16,7 @@ import json
 class RunConfig:
     """Run configuration for single BRER ensemble member."""
 
-    def __init__(self, tpr, ensemble_dir, ensemble_num=1, pairs_json='pair_data.json'):
+    def __init__(self, tpr, ensemble_dir, ensemble_num=1, work_sample=1, pairs_json='pair_data.json'):
         """The run configuration specifies the files and directory structure
         used for the run. It determines whether the run is in the training,
         convergence, or production phase, then performs the run.
@@ -29,6 +29,8 @@ class RunConfig:
             path to top directory which contains the full ensemble.
         ensemble_num : int, optional
             the ensemble member to run, by default 1
+        work_sample: int, optional
+            the work sample number. Used in convergence and production phases.
         pairs_json : str, optional
             path to file containing *ALL* the pair metadata.
             An example of what such a file should look like is provided in the data directory,
@@ -36,6 +38,7 @@ class RunConfig:
         """
         self.tpr = tpr
         self.ens_dir = ensemble_dir
+        self.work_sample = work_sample
 
         # a list of identifiers of the residue-residue pairs that will be restrained
         self.__names = []
@@ -121,17 +124,33 @@ class RunConfig:
 
     def __change_directory(self):
         # change into the current working directory (ensemble_path/member_path/iteration/phase)
-        dir_help = DirectoryHelper(top_dir=self.ens_dir, param_dict=self.run_data.general_params.get_as_dictionary())
+        param_dict = self.run_data.general_params.get_as_dictionary()
+        phase = self.run_data.get('phase')
+
+        if phase != 'training':
+            param_dict['work_sample'] = self.work_sample
+
+        dir_help = DirectoryHelper(top_dir=self.ens_dir, param_dict=param_dict)
         dir_help.build_working_dir()
-        dir_help.change_dir('phase')
+
+        if phase == 'training':
+            dir_help.change_dir('phase')
+        else:
+            dir_help.change_dir('work_sample')
 
     def __move_cpt(self):
         current_iter = self.run_data.get('iteration')
         ens_num = self.run_data.get('ensemble_num')
         phase = self.run_data.get('phase')
+        work_sample = self.work_sample
 
+        if phase == 'training':
+            updated_path = '{}/mem_{}/{}/{}/state.cpt'.format(self.ens_dir, ens_num, current_iter, phase)
+        else:
+            updated_path = '{}/mem_{}/{}/{}/{}/state.cpt'.format(self.ens_dir,
+                                                                 ens_num, current_iter, phase, work_sample)
         # If the cpt already exists, don't overwrite it
-        if os.path.exists('{}/mem_{}/{}/{}/state.cpt'.format(self.ens_dir, ens_num, current_iter, phase)):
+        if os.path.exists(updated_path):
             self._logger.info("Phase is {} and state.cpt already exists: not moving any files".format(phase))
 
         else:
@@ -140,23 +159,24 @@ class RunConfig:
 
             if phase in ['training', 'convergence']:
                 if prev_iter > -1:
-                    # Get the production cpt from previous iteration
-                    gmx_cpt = '{}/{}/production/state.cpt'.format(member_dir, prev_iter)
-                    shutil.copy(gmx_cpt, '{}/state.cpt'.format(os.getcwd()))
-
+                    raise ValueError("""Correlation structure calculations do not support multiple iterations yet!
+                                     You're trying to run iteration {}""".format(current_iter))
                 else:
                     pass  # Do nothing
-
             else:
                 # Get the convergence cpt from current iteration
-                gmx_cpt = '{}/{}/convergence/state.cpt'.format(member_dir, current_iter)
+                gmx_cpt = '{}/{}/convergence/{}/state.cpt'.format(member_dir, current_iter, work_sample)
                 shutil.copy(gmx_cpt, '{}/state.cpt'.format(os.getcwd()))
 
     def __train(self):
 
         # do re-sampling
         targets = self.pairs.re_sample()
+        while self.run_data.history.check_targets(targets):
+            targets = self.pairs.re_sample()
+
         self._logger.info('New targets: {}'.format(targets))
+
         for name in self.__names:
             self.run_data.set(name=name, target=targets[name])
 
@@ -197,14 +217,19 @@ class RunConfig:
         # In the future runs (convergence, production) we need the ABSOLUTE VALUE of alpha.
         self._logger.info("=====TRAINING INFO======\n")
 
+        alphas = {}
         for i in range(len(self.__names)):
             current_name = sites_to_name[context.potentials[i].name]
             current_alpha = context.potentials[i].alpha
             current_target = context.potentials[i].target
 
+            alphas[current_name] = current_alpha
             self.run_data.set(name=current_name, alpha=current_alpha)
             self.run_data.set(name=current_name, target=current_target)
+
             self._logger.info("Plugin {}: alpha = {}, target = {}".format(current_name, current_alpha, current_target))
+
+        self.run_data.history.new_entry(alphas, targets)
 
     def __converge(self):
 

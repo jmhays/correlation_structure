@@ -27,13 +27,13 @@ class DirectoryHelper:
             the path to the directory containing all the ensemble members.
         param_dict :
             a dictionary specifying the ensemble number, the iteration,
-            and the phase of the simulation.
+            and the phase of the simulation. Optionally, the work sample number.
 
         Examples
         --------
         >>> .
         >>> ├── 0
-        >>> │   ├── converge_dist
+        >>> │   ├── convergence
         >>> │   │   ├── state.cpt
         >>> │   │   ├── state_prev.cpt
         >>> │   │   └── traj_comp.part0001.xtc
@@ -67,7 +67,7 @@ class DirectoryHelper:
         Parameters
         ----------
         level :
-            one of 'top', 'ensemble_num', 'iteration', or 'phase'.
+            one of 'top', 'ensemble_num', 'iteration', 'phase', or 'work_sample'.
             See the directory structure example provided at the beginning of this class.
 
         Returns
@@ -85,6 +85,10 @@ class DirectoryHelper:
         elif level == 'phase':
             return_dir = '{}/mem_{}/{}/{}'.format(self._top_dir, pdict['ensemble_num'], pdict['iteration'],
                                                   pdict['phase'])
+        elif level == 'work_sample':
+            assert(pdict['phase'] == 'convergence' or pdict['phase'] == 'production')
+            return_dir = '{}/mem_{}/{}/{}/{}'.format(self._top_dir, pdict['ensemble_num'], pdict['iteration'],
+                                                     pdict['phase'], pdict['work_sample'])
         else:
             raise ValueError('{} is not a valid directory type for BRER simulations'.format('type'))
         return return_dir
@@ -93,12 +97,17 @@ class DirectoryHelper:
         """Checks to see if the working directory for current state of BRER
         simulation exists. If it does not, creates the directory.
         """
-        if not os.path.exists(self.get_dir('phase')):
-            tree = [self.get_dir('ensemble_num'), self.get_dir('iteration')]
-            for leaf in tree:
-                if not os.path.exists(leaf):
-                    os.mkdir(leaf)
-            os.mkdir(self.get_dir('phase'))
+
+        os.makedirs(self.get_dir('phase'), exist_ok=True)
+        phase = self._param_dict['phase']
+        if phase == 'convergence' or phase == 'production':
+            os.makedirs(self.get_dir('work_sample'), exist_ok=True)
+        # if not os.path.exists(self.get_dir('phase')):
+        #     tree = [self.get_dir('ensemble_num'), self.get_dir('iteration')]
+        #     for leaf in tree:
+        #         if not os.path.exists(leaf):
+        #             os.mkdir(leaf)
+        #     os.mkdir(self.get_dir('phase'))
 
     def change_dir(self, level):
         """Change to directory specified by level.
@@ -107,6 +116,6 @@ class DirectoryHelper:
         ----------
         level : str
             How far to go down the directory tree.
-            Can be one of 'top', 'ensemble_num', 'iteration', or 'phase'.
+            Can be one of 'top', 'ensemble_num', 'iteration', 'phase', or 'work_sample'.
         """
         os.chdir(self.get_dir(level))

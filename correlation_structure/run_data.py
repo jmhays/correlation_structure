@@ -75,6 +75,40 @@ class PairParams(MetaData):
         self.set(sites=sites, logging_filename="{}.log".format(self.name))
 
 
+class History(MetaData):
+    def __init__(self):
+        super().__init__('history')
+
+    def check_targets(self, targets: dict):
+        """Checks whether targets have been pre-trained (i.e., have an alpha associated with them)
+        
+        Parameters
+        ----------
+        targets : dict
+            A set of targets for each pair.
+        
+        Returns
+        -------
+        bool
+            True if targets have already been trained, False if they have not.
+        """
+        sorted_keys = sorted(list(targets.keys()))
+        target_key = ",".join(targets[key] for key in sorted_keys)
+        if target_key in self._metadata:
+            return True
+        else:
+            return False
+
+    def new_entry(self, alphas: dict, targets: dict):
+        sorted_keys = sorted(list(targets.keys()))
+        target_key = ",".join(targets[key] for key in sorted_keys)
+        if target_key in self._metadata:
+            print("The targets {} are already stored".format(target_key))
+        else:
+            sorted_alphas = [alphas[key] for key in sorted_keys]
+            self.set(key=target_key, value=sorted_alphas)
+
+
 class RunData:
     """Stores (and manipulates, to a lesser extent) all the metadata for a BRER
     run."""
@@ -85,6 +119,7 @@ class RunData:
         self.general_params = GeneralParams()
         self.general_params.set_to_defaults()
         self.pair_params = {}
+        self.history = History()
         self.__names = []
 
     def set(self, name=None, **kwargs):
@@ -168,7 +203,11 @@ class RunData:
         for name in self.pair_params.keys():
             pair_param_dict[name] = self.pair_params[name].get_as_dictionary()
 
-        return {'general parameters': self.general_params.get_as_dictionary(), 'pair parameters': pair_param_dict}
+        return {
+            'general parameters': self.general_params.get_as_dictionary(),
+            'pair parameters': pair_param_dict,
+            'history': self.history.get_as_dictionary()
+        }
 
     def from_dictionary(self, data: dict):
         """Loads metadata into the class from a dictionary.
@@ -179,6 +218,7 @@ class RunData:
             RunData metadata as a dictionary.
         """
         self.general_params.set_from_dictionary(data['general parameters'])
+        self.history.set_from_dictionary(data['history'])
         for name in data['pair parameters'].keys():
             self.pair_params[name] = PairParams(name)
             self.pair_params[name].set_from_dictionary(data['pair parameters'][name])
