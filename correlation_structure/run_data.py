@@ -93,7 +93,7 @@ class History(MetaData):
             True if targets have already been trained, False if they have not.
         """
         sorted_keys = sorted(list(targets.keys()))
-        target_key = ",".join(targets[key] for key in sorted_keys)
+        target_key = ",".join(str(targets[key]) for key in sorted_keys)
         if target_key in self._metadata:
             return True
         else:
@@ -101,7 +101,7 @@ class History(MetaData):
 
     def new_entry(self, alphas: dict, targets: dict):
         sorted_keys = sorted(list(targets.keys()))
-        target_key = ",".join(targets[key] for key in sorted_keys)
+        target_key = ",".join(str(targets[key]) for key in sorted_keys)
         if target_key in self._metadata:
             print("The targets {} are already stored".format(target_key))
         else:

@@ -54,6 +54,8 @@ class RunConfig:
         self.run_data = RunData()
         self.run_data.set(ensemble_num=ensemble_num)
 
+        os.makedirs('{}/mem_{}'.format(ensemble_dir, ensemble_num), exist_ok=True)
+
         self.state_json = '{}/mem_{}/state.json'.format(ensemble_dir, self.run_data.get('ensemble_num'))
         # If we're in the middle of a run, load the BRER checkpoint file and continue from
         # the current state.
