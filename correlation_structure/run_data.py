@@ -143,6 +143,8 @@ class RunData:
             if not name:
                 if key in self.general_params.get_requirements():
                     self.general_params.set(key, value)
+                elif key == "history":
+                    self.history.set(key=key, value=value)
                 else:
                     raise ValueError('You have provided a name; this means you are probably trying to set a '
                                      'pair-specific parameter. {} is not pair-specific'.format(key))
@@ -171,6 +173,8 @@ class RunData:
             return self.general_params.get(key)
         elif name:
             return self.pair_params[name].get(key)
+        elif key == "history":
+            return self.history
         else:
             raise ValueError('You have not provided a name, but are trying to get a pair-specific parameter. '
                              'Please provide a pair name')

@@ -298,5 +298,5 @@ class RunConfig:
             self.__production()
             if set_next_phase:
                 self.run_data.set(phase='training', start_time=0, iteration=(self.run_data.get('iteration') + 1))
-        
+
         self.run_data.save_config(self.state_json)
