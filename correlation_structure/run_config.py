@@ -4,6 +4,7 @@ from correlation_structure.run_data import RunData
 from correlation_structure.pair_data import MultiPair
 from correlation_structure.plugin_configs import TrainingPluginConfig, ConvergencePluginConfig, ProductionPluginConfig, PluginConfig
 from correlation_structure.directory_helper import DirectoryHelper
+from correlation_structure.assign_part_number import AssignPartNumber
 from copy import deepcopy
 import os
 import shutil
@@ -287,6 +288,14 @@ class RunConfig:
 
         self.__change_directory()
 
+        # Back up log files
+        log_backup = AssignPartNumber(os.getcwd())
+        for name in self.__names:
+            logging_file = self.run_data.get("logging_filename", name=name)
+            if os.path.exists(logging_file):
+                log_backup.assign_part_number(logging_file)
+
+        # Now run the simulations
         if phase == 'training':
             self.__train()
             self.run_data.set(phase='convergence')
