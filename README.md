@@ -1,4 +1,4 @@
-# run_brer
+# correlation_structure
 
 
 ![Documentation Status](https://readthedocs.org/projects/run-brer/badge/?version=latest)
@@ -16,9 +16,16 @@ devel:
 ![Build Status](https://travis-ci.com/jmhays/run_brer.svg?token=zQbC3QZqV1zHSGhQXUTP&branch=devel)
 ![codecov](https://codecov.io/gh/jmhays/run_brer/branch/devel/graph/badge.svg)
 
-Set of scripts for running BRER simulations using gmxapi. Details of this method may be found at:
+Set of scripts for running EESM simulations using gmxapi. The EESM method is described in:
+Hays, J. M., Boland, E., & Kasson, P. M. Inference of Joint Conformational Distributions from Separately Acquired Experimental Measurements. 
+*The Journal of Physical Chemistry Letters* 2021 12 (6), 1606-1611
+DOI: [10.1021/acs.jpclett.0c03623](https://pubs.acs.org/doi/abs/10.1021/acs.jpclett.0c03623)
+
+And is based on the BRER method:
 
 Hays, J. M., Cafiso, D. S., & Kasson, P. M. Hybrid Refinement of Heterogeneous Conformational Ensembles using Spectroscopic Data. *The Journal of Physical Chemistry Letters*. DOI: [10.1021/acs.jpclett.9b01407](https://pubs.acs.org/doi/10.1021/acs.jpclett.9b01407)
+
+## Documentation is in the process of update from BRER to EESM
 
 ## Installation
 
